@@ -40,6 +40,8 @@ class FrontEndTestCase(TestCase):
         self.now = datetime.datetime.utcnow().replace(tzinfo=utc)
         self.timedelta = datetime.timedelta(15)
         author = User.objects.get(pk=1)
+        category = Category()
+        category.name = "Test Category"
         for count in range(1, 11):
             post = Post(title="Post %d Title" % count,
                         text="foo",
@@ -48,6 +50,8 @@ class FrontEndTestCase(TestCase):
                 # publish the first five posts
                 pubdate = self.now - self.timedelta * count
                 post.published_date = pubdate
+            if count % 2:
+                post.category = category
             post.save()
 
     def test_list_only_published(self):
@@ -70,3 +74,11 @@ class FrontEndTestCase(TestCase):
                 self.assertContains(resp, title)
             else:
                 self.assertEqual(resp.status_code, 404)
+
+    def test_category(self):
+        resp = self.client.get('/categories/1/')
+        self.assertEqual(resp.status_code, 200)
+        self.assertCotains(resp, "Category: Test Category")
+        self.assertCotains(resp, "Post 1 Title")
+        self.assertContain(resp, "Post 2 Title")
+        self.assertContain(resp, "Post 3 Title")
