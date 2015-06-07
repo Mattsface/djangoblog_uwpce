@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import RequestContext, loader
-from myblog.models import Post
+from myblog.models import Post, Category
+
 
 
 def stub_view(request, *args, **kwargs):
@@ -26,6 +27,15 @@ def detail_view(request, post_id):
     published = Post.objects.exclude(published_date__exact=None)
     try:
         post = published.get(pk=post_id)
+    except Post.DoesNotExist:
+        raise Http404
+    context = {'post': post}
+    return render(request, 'detail.html', context)
+
+def category_detail_view(request, category_id):
+    cat = Post.objects.exclude(published_date__exact=None)
+    try:
+        post = Category.get(pk=post_id)
     except Post.DoesNotExist:
         raise Http404
     context = {'post': post}
